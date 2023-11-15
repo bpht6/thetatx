@@ -1,0 +1,72 @@
+<html>
+<body>
+<center>
+<br>
+<h1>Sign and Transmit a Raw Send Transaction </h1> 
+<br>
+Enter Private Key<br>
+<input type="text" id="key" style="width:1200px;" value=""><br><br>
+<hr><br>
+Enter Receiving Address<br>
+<input type="text" id="to" style="width:1200px;" value=""><br><br>
+Enter Theta to Send<br>
+<input type="text" id="theta" style="width:1200px;" value=""><br><br>
+Enter Tfuel to Send<br>
+<input type="text" id="tfuel" style="width:1200px;" value=""><br><br>
+Enter Sequence (Nounce)<br>
+<input type="text" id="nounce" style="width:1200px;" value=""><br><br>
+<button onclick="sign()" >Calculate Raw Transaction</Button>
+<br><br>
+Your Node Address<br>
+<div id="address" style="width:1200px;"> </div><br><br>
+<b> A Raw Signed Transaction </b><br><br>
+<div id="raw" style="width:1200px;word-break: break-all;" style="width:1200px;"></div><br><br>
+<button onclick="broadcast()" >Broadcast Raw Transaction</Button>
+<br><br>
+<b> API reply </b><br><br>
+<div id="reply" style="width:1200px;word-break: break-all;" style="width:1200px;"></div><br><br>
+
+</body>
+
+<script src="https://www.thetascan.io/dist/ethers-v4.min.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+<script src="https://www.thetascan.io/dist/thetatx-v1.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+
+<script>
+async function sign() {
+	const privateKey = document.getElementById("key").value;
+	let wallet = new ethers.Wallet(privateKey);
+	document.getElementById("address").innerHTML = wallet.address.toLowerCase();
+
+	var array = {};
+	array["txType"] = 2;
+	array["sequence"] = document.getElementById("nounce").value;
+	array["from"] = wallet.address.toLowerCase();
+	array["to"] = document.getElementById("to").value;
+	array["tfuel"] = document.getElementById("tfuel").value;
+	array["theta"] = document.getElementById("theta").value;
+
+	var thetaTx = new thetatx(array);
+	const transaction = thetaTx.buildtx();
+	let signPromise = wallet.sign(transaction)
+	signPromise.then((signedTransaction) => {
+	    document.getElementById("raw").innerHTML = thetaTx.rawtx(signedTransaction);
+	});
+}
+
+async function broadcast(){
+	
+	var url = "http://www.thetascan.io/api/txn/?raw=".concat(document.getElementById("raw").innerHTML);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		document.getElementById("reply").innerHTML = JSON.stringify(data);
+	});
+}
+
+</script>

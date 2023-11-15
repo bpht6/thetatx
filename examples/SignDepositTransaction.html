@@ -1,0 +1,75 @@
+<html>
+<body>
+<center>
+<br>
+<h1>Sign and Transmit a Raw Staking Transaction </h1> 
+<br>
+Enter Private Key<br>
+<input type="text" id="key" style="width:1200px;" value=""><br><br>
+<hr><br>
+Enter Node Summary<br>
+<input type="text" id="node" style="width:1200px;" value=""><br><br>
+Select the type of Node you want to withdraw from<br>
+<select id="type" style="width:1200px;">
+  <option value="edge">Edge Node</option>
+  <option value="guardian">Guardian Node</option>
+</select><br><br>
+Enter the amount you would like to stake<br>
+<input type="text" id="stake" style="width:1200px;" value=""><br><br>
+Enter Sequence (Nounce)<br>
+<input type="text" id="nounce" style="width:1200px;" value=""><br><br>
+<button onclick="sign()" >Calculate Raw Transaction</Button>
+<br><br>
+Your Address<br>
+<div id="address" style="width:1200px;"> </div><br><br>
+<b> A Raw Signed Transaction </b><br><br>
+<div id="raw" style="width:1200px;word-break: break-all;" style="width:1200px;"></div><br><br>
+<button onclick="broadcast()" >Broadcast Raw Transaction</Button>
+<br><br>
+<b> API reply </b><br><br>
+<div id="reply" style="width:1200px;word-break: break-all;" style="width:1200px;"></div><br><br>
+
+</body>
+
+<script src="https://www.thetascan.io/dist/ethers-v4.min.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+<script src="https://www.thetascan.io/dist/thetatx-v1.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+
+<script>
+async function sign() {
+	const privateKey = document.getElementById("key").value;
+	let wallet = new ethers.Wallet(privateKey);
+	document.getElementById("address").innerHTML = wallet.address.toLowerCase();
+
+	var array = {};
+	array["txType"] = 10;
+	array["sequence"] = document.getElementById("nounce").value;
+	array["from"] = wallet.address.toLowerCase();
+	array["node"] = document.getElementById("node").value;
+	array["type"] = document.getElementById("type").value;
+	array["stake"] = document.getElementById("stake").value;
+
+	var thetaTx = new thetatx(array);
+	const transaction = thetaTx.buildtx();
+	let signPromise = wallet.sign(transaction)
+	signPromise.then((signedTransaction) => {
+	    document.getElementById("raw").innerHTML = thetaTx.rawtx(signedTransaction);
+	});
+}
+
+async function broadcast(){
+	
+	var url = "http://www.thetascan.io/api/txn/?raw=".concat(document.getElementById("raw").innerHTML);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		document.getElementById("reply").innerHTML = JSON.stringify(data);
+	});
+}
+
+</script>

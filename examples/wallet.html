@@ -1,0 +1,367 @@
+<html>
+<style>
+body{
+  background-color:#1c1c1c;
+  color:#dbdbdb;
+  font-size:18px;
+}
+button{
+  margin:10px;
+  padding:10px 20px 10px 20px;
+  font-size:18px;
+}
+.loader {
+        transform: rotateZ(45deg);
+        perspective: 1000px;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        color: #18B3ED;
+      }
+        .loader:before,
+        .loader:after {
+          content: '';
+          display: block;
+          position: absolute;
+          width: inherit;
+          height: inherit;
+          border-radius: 50%;
+          transform: rotateX(70deg);
+          animation: 1s spin linear infinite;
+        }
+        .loader:after {
+          color: #05D8D8;
+          transform: rotateY(70deg);
+          animation-delay: .4s;
+        }
+
+      @keyframes rotate {
+        0% {
+          transform: translate(-50%, -50%) rotateZ(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotateZ(360deg);
+        }
+      }
+
+      @keyframes rotateccw {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(-360deg);
+        }
+      }
+
+      @keyframes spin {
+        0%,
+        100% {
+          box-shadow: .2em 0px 0 0px currentcolor;
+        }
+        12% {
+          box-shadow: .2em .2em 0 0 currentcolor;
+        }
+        25% {
+          box-shadow: 0 .2em 0 0px currentcolor;
+        }
+        37% {
+          box-shadow: -.2em .2em 0 0 currentcolor;
+        }
+        50% {
+          box-shadow: -.2em 0 0 0 currentcolor;
+        }
+        62% {
+          box-shadow: -.2em -.2em 0 0 currentcolor;
+        }
+        75% {
+          box-shadow: 0px -.2em 0 0 currentcolor;
+        }
+        87% {
+          box-shadow: .2em -.2em 0 0 currentcolor;
+        }
+      }
+   
+</style>
+<body>
+<center>
+<h2> Example creating a Theta wallet using raw transactions and thetatx-v1.js </h2><br><br>
+<div style="width:1200px;">
+<div id="menu" style="width:1200px;height:100px;visibility: hidden;"><button onclick="send()">Send Theta/Tfuel</button><button onclick="stake()">Stake Theta/Tfuel</button><button onclick="withdraw()">Withdraw Theta/Tfuel Stake</button><button onclick="wrap()">Wrap Tfuel</button><button onclick="unwrap()">Unwrap Tfuel</button></div>
+<div id="body" style="width:880px;display:inline-block;vertical-align:top;"><br>
+Enter your Private Key to unlock the wallet<br><br>
+<input id="private" type="text" style="width:900px;font-size:18px;padding:2px;"/>
+<br><br>
+<button onclick="unlock()">Unlock Wallet</button>
+</div>
+<div id="rightBox" style="width:300px;display:none;text-align: left;"> </div>
+<div id="processing" style="text-align:left; width:1200px;margin-top:20px;visibility: hidden;"><span class="loader"></span> <span style="margin-left:60px;font-size:48px;"> Processing Transaction</span></div>
+</div>
+</center>
+</body>
+</html>
+
+<script src="https://www.thetascan.io/dist/ethers-v4.min.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+<script src="https://www.thetascan.io/dist/thetatx-v1.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+
+<script>
+
+var privateKey;
+var wallet;
+
+function unlock() {
+	privateKey = document.getElementById("private").value
+	try {
+		wallet = new ethers.Wallet(privateKey);
+	}
+	catch(err) {
+		alert("The private key appears to be invalid");
+	}
+	if (wallet.address.length == 42){
+		document.getElementById("body").innerHTML = "Public Address: ".concat(wallet.address.toLowerCase(),"<br><br> <h2> You have successfully unlocked your wallet.<br>Use the Buttons at the top to create and broadcast a raw<br> transaction on the Theta blockchain.</h2>");
+		document.getElementById("menu").style.visibility = "visible";
+		document.getElementById("rightBox").style.display = "inline-block";
+		getBalance();
+	}
+}	
+async function getBalance() {
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		document.getElementById("rightBox").innerHTML = "Wallet: ".concat(String(wallet.address.toLowerCase()).slice(0, 6),"...",String(wallet.address.toLowerCase()).slice(36, 42),"<br><br>Theta Balance: <b>",data['theta'].toFixed(2),"</b><br><br> Tfuel Balance: <b>",data['tfuel'].toFixed(2),"</b><br><br> Theta Staked: <b>",data['theta_staked'].toFixed(2),"</b><br><br> Theta Staked: <b>",data['tfuel_staked'].toFixed(2),"</b><br><br> Sequence: <b>",data['sequence'],"</b><br><br>");		
+	});
+}
+
+function send() {
+	document.getElementById("body").style.textAlign = "Left";
+	document.getElementById("body").innerHTML = '<h2> Send Theta and Tfuel </h2><br>Enter Receiving Address<br><input type="text" id="to" style="width:800px;" value=""><br><br>Enter Theta to Send<br><input type="text" id="theta" style="width:800px;" value=""><br><br>Enter Tfuel to Send<br><input type="text" id="tfuel" style="width:800px;" value=""><br><br><button onclick="signSend()" id="signSendButton" >Calculate Raw Transaction and Send</Button><br><br>';
+}
+function stake() {
+	document.getElementById("body").style.textAlign = "Left";
+	document.getElementById("body").innerHTML = '<h2> Stake your Theta or Tfuel </h2><br>Enter Node Summary<br><input type="text" id="node" style="width:800px;" value=""><br><br>Select the type of Node you want to withdraw from<br><select id="type" style="width:800px;"><option value="edge">Edge Node (Tfuel) </option><option value="guardian">Guardian Node (Theta)</option></select><br><br>Enter the amount you would like to stake<br><input type="text" id="stake" style="width:800px;" value=""><br><br><button onclick="signStake()" id="signStakeButton"  >Calculate Raw Transaction and Send</Button><br><br>';
+}
+function withdraw() {
+	document.getElementById("body").style.textAlign = "Left";
+	document.getElementById("body").innerHTML = '<h2> Withdraw your Theta or Tfuel Stake </h2><br>Enter Node Address<br><input type="text" id="node" style="width:800px;" value=""><br><br>Select the type of Node you want to withdraw from<br><select id="type" style="width:800px;"><option value="edge">Edge Node (Tfuel) </option><option value="guardian">Guardian Node (Theta)</option></select><br><br><button onclick="signWithdraw()" id="signWithdrawButton"  >Calculate Raw Transaction and Send</Button><br><br>';
+}
+function wrap() {
+	document.getElementById("body").style.textAlign = "Left";
+	document.getElementById("body").innerHTML = '<h2> Wrap your Tfuel </h2><br>Enter Tfuel Value<br><input type="text" id="tfuel" style="width:800px;" value=""><br><br>Enter Gas Price<br><input type="text" id="gasPrice" style="width:800px;" value=".00004"><br><br>Enter Gas Limit<br><input type="text" id="gasLimit" style="width:800px;" value="55000"><br><br><button onclick="signWrap()"  id="signWrapButton"  >Calculate Raw Transaction and Deposit Tfuel</Button><br><br>** This will deposit Tfuel and leave it in the contract as Wrapped Tfuel. <br> It will not show in your wallet unless you transfer it out of the contract**';
+}
+function unwrap() {
+	document.getElementById("body").style.textAlign = "Left";
+	document.getElementById("body").innerHTML = '<h2> Unwrap your Tfuel </h2><br>Enter Tfuel Value<br><input type="text" id="tfuel" style="width:800px;" value=""><br><br>Enter Gas Price<br><input type="text" id="gasPrice" style="width:800px;" value=".00004"><br><br>Enter Gas Limit<br><input type="text" id="gasLimit" style="width:800px;" value="70000"><br><br><button onclick="signUnwrap()"  id="signUnwrapButton" >Calculate Raw Transaction and Approve turning back into tfuel</Button><br><br>** This will return the wrapped Tfuel in the contract back to Tfuel in your wallet. **';
+}
+
+async function signSend(){
+	document.getElementById("processing").style.visibility = "visible";
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		var array = {};
+		array["txType"] = 2;
+		array["sequence"] = data['sequence'] + 1 ;
+		array["from"] = wallet.address.toLowerCase();
+		array["to"] = document.getElementById("to").value;
+		array["tfuel"] = document.getElementById("tfuel").value;
+		array["theta"] = document.getElementById("theta").value;
+		var thetaTx = new thetatx(array);
+		const transaction = thetaTx.buildtx();
+		let signPromise = wallet.sign(transaction)
+		signPromise.then((signedTransaction) => {
+			var url2 = "http://www.thetascan.io/api/txn/?raw=".concat(thetaTx.rawtx(signedTransaction));
+			fetch(url2)
+			.then( res => res.json() )
+			.then(  function(data2) {
+				document.getElementById("processing").style.visibility = "hidden";
+				try {
+  					alert(data2['error']['message']);
+				}
+				catch(err) {
+				}
+				try {
+  					alert("Transaction Complete - Hash: ".concat(data2['result']['hash']));
+					var myTimeout = setTimeout(getBalance, 2000);
+				}
+				catch(err) {
+				}
+			});
+		});
+	});
+}
+
+async function signStake(){
+	document.getElementById("processing").style.visibility = "visible";
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		var array = {};
+		array["txType"] = 10;
+		array["sequence"] = data['sequence'] + 1 ;
+		array["from"] = wallet.address.toLowerCase();
+		array["node"] = document.getElementById("node").value;
+		array["type"] = document.getElementById("type").value;
+		array["stake"] = document.getElementById("stake").value;
+		var thetaTx = new thetatx(array);
+		const transaction = thetaTx.buildtx();
+		let signPromise = wallet.sign(transaction)
+		signPromise.then((signedTransaction) => {
+			var url2 = "http://www.thetascan.io/api/txn/?raw=".concat(thetaTx.rawtx(signedTransaction));
+			fetch(url2)
+			.then( res => res.json() )
+			.then(  function(data2) {
+				document.getElementById("processing").style.visibility = "hidden";
+				try {
+  					alert(data2['error']['message']);
+				}
+				catch(err) {
+				}
+				try {
+  					alert("Transaction Complete - Hash: ".concat(data2['result']['hash']));
+					var myTimeout = setTimeout(getBalance, 2000);
+				}
+				catch(err) {
+				}
+			});
+		});
+	});
+}
+
+async function signWithdraw(){
+	document.getElementById("processing").style.visibility = "visible";
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		var array = {};
+		array["txType"] = 9;
+		array["sequence"] = data['sequence'] + 1 ;
+		array["from"] = wallet.address.toLowerCase();
+		array["node"] = document.getElementById("node").value;
+		array["type"] = document.getElementById("type").value;
+		var thetaTx = new thetatx(array);
+		const transaction = thetaTx.buildtx();
+		let signPromise = wallet.sign(transaction)
+		signPromise.then((signedTransaction) => {
+			var url2 = "http://www.thetascan.io/api/txn/?raw=".concat(thetaTx.rawtx(signedTransaction));
+			fetch(url2)
+			.then( res => res.json() )
+			.then(  function(data2) {
+				document.getElementById("processing").style.visibility = "hidden";
+				try {
+  					alert(data2['error']['message']);
+				}
+				catch(err) {
+				}
+				try {
+  					alert("Transaction Complete - Hash: ".concat(data2['result']['hash']));
+					var myTimeout = setTimeout(getBalance, 2000);
+				}
+				catch(err) {
+				}
+			});
+		});
+	});
+}
+async function signWrap(){
+	document.getElementById("processing").style.visibility = "visible";
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		var array = {};
+		array["txType"] = 7;
+		array["sequence"] = data['sequence'] + 1 ;
+		array["from"] = wallet.address.toLowerCase();
+		array["to"] = "0x4dc08b15ea0e10b96c41aec22fab934ba15c983e"
+		array["gasPrice"] = document.getElementById("gasPrice").value;
+		array["gasLimit"] = document.getElementById("gasLimit").value;
+		array["tfuel"] = document.getElementById("tfuel").value;
+		array["data"] = ethers.utils.id(" deposit()").slice(0,10);
+		var thetaTx = new thetatx(array);
+		const transaction = thetaTx.buildtx();
+		let signPromise = wallet.sign(transaction)
+		signPromise.then((signedTransaction) => {
+			var url2 = "http://www.thetascan.io/api/txn/?raw=".concat(thetaTx.rawtx(signedTransaction));
+			fetch(url2)
+			.then( res => res.json() )
+			.then(  function(data2) {
+				document.getElementById("processing").style.visibility = "hidden";
+				try {
+  					alert(data2['error']['message']);
+				}
+				catch(err) {
+				}
+				try {
+  					alert("Transaction Complete - Hash: ".concat(data2['result']['hash']));
+					var myTimeout = setTimeout(getBalance, 2000);
+				}
+				catch(err) {
+				}
+			});
+		});
+	});
+}
+async function signUnwrap(){
+	document.getElementById("processing").style.visibility = "visible";
+	var tfuel;
+	var index;
+	var url = "http://www.thetascan.io/api/balance/?address=".concat(wallet.address);
+	fetch(url)
+	.then( res => res.json() )
+	.then(  function(data) {
+		var array = {};
+		array["txType"] = 7;
+		array["sequence"] = data['sequence'] + 1 ;
+		array["from"] = wallet.address.toLowerCase();
+		array["to"] = "0x4dc08b15ea0e10b96c41aec22fab934ba15c983e"
+		array["gasPrice"] = document.getElementById("gasPrice").value;
+		array["gasLimit"] = document.getElementById("gasLimit").value;
+		array["tfuel"] = "0";
+		tfuel = document.getElementById("tfuel").value;
+		if (Number.isInteger(tfuel) == true){
+			tfuel = BigInt(tfuel) * BigInt(Math.pow(10, 18));
+		}else{
+			index = String(tfuel).indexOf(".");
+			index = String(tfuel).slice(index).length;
+			tfuel = (BigInt(tfuel * Math.pow(10, index)) * BigInt(Math.pow(10, 18)))/ BigInt(Math.pow(10, index));
+		}
+		wtfuel = Number(tfuel).toString(16).padStart(64, '0');
+		array["data"] = ethers.utils.id("withdraw(uint256)").slice(0,10).concat(wtfuel);
+		document.getElementById("tfuel").value;
+		var thetaTx = new thetatx(array);
+		const transaction = thetaTx.buildtx();
+		let signPromise = wallet.sign(transaction)
+		signPromise.then((signedTransaction) => {
+			var url2 = "http://www.thetascan.io/api/txn/?raw=".concat(thetaTx.rawtx(signedTransaction));
+			fetch(url2)
+			.then( res => res.json() )
+			.then(  function(data2) {
+				document.getElementById("processing").style.visibility = "hidden";
+				try {
+  					alert(data2['error']['message']);
+				}
+				catch(err) {
+				}
+				try {
+  					alert("Transaction Complete - Hash: ".concat(data2['result']['hash']));
+					var myTimeout = setTimeout(getBalance, 2000);
+				}
+				catch(err) {
+				}
+			});
+		});
+	});
+}
+
+
+
+</script>
