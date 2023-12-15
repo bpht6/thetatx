@@ -278,8 +278,16 @@ class thetatx {
 	    this.sig3 = parseInt(signed.slice(this.signatureLocation,this.signatureLocation+2),16);
 	    if (this.sig3 == 27){this.sig3 = "00"};
     	    if (this.sig3 == 28){this.sig3 = "01"};
-	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68);
-	    this.sig2 = signed.slice(this.signatureLocation + 70,this.signatureLocation + 134);
+	    this.adjust = 0;
+	    this.firstSig = parseInt(signed.slice(this.signatureLocation+2,this.signatureLocation+4),16);
+	    if (this.firstSig == 159) {this.adjust = 2;}
+	    if (this.firstSig == 158) {this.adjust = 4;}
+	    if (this.firstSig == 157) {this.adjust = 6;}
+	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68 - this.adjust);
+	    this.sig2 = signed.slice(this.signatureLocation + 70 - this.adjust,this.signatureLocation + 134 - this.adjust);
+	        if (this.adjust == 2) {this.sig1 = "00".concat(this.sig1);}
+		if (this.adjust == 4) {this.sig1 = "0000".concat(this.sig1);}
+		if (this.adjust == 6) {this.sig1 = "000000".concat(this.sig1);}
 	    if (this.sig2.length < 64) {
 		this.sigCount = 64 - this.sig2.length;
 		if (this.sigCount == 2) {this.sig2 = "00".concat(this.sig2);}
@@ -323,8 +331,16 @@ class thetatx {
 	    this.sig3 = parseInt(signed.slice(this.signatureLocation,this.signatureLocation+2),16);
 	    if (this.sig3 == 27){this.sig3 = "00"};
     	    if (this.sig3 == 28){this.sig3 = "01"};
-	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68);
-	    this.sig2 = signed.slice(this.signatureLocation + 70,this.signatureLocation + 134);
+	    this.adjust = 0;
+	    this.firstSig = parseInt(signed.slice(this.signatureLocation+2,this.signatureLocation+4),16);
+	    if (this.firstSig == 159) {this.adjust = 2;}
+	    if (this.firstSig == 158) {this.adjust = 4;}
+	    if (this.firstSig == 157) {this.adjust = 6;}
+	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68 - this.adjust);
+	    this.sig2 = signed.slice(this.signatureLocation + 70 - this.adjust,this.signatureLocation + 134 - this.adjust);
+	        if (this.adjust == 2) {this.sig1 = "00".concat(this.sig1);}
+		if (this.adjust == 4) {this.sig1 = "0000".concat(this.sig1);}
+		if (this.adjust == 6) {this.sig1 = "000000".concat(this.sig1);}
 	    if (this.sig2.length < 64) {
 		this.sigCount = 64 - this.sig2.length;
 		if (this.sigCount == 2) {this.sig2 = "00".concat(this.sig2);}
@@ -363,8 +379,16 @@ class thetatx {
 	    this.sig3 = parseInt(signed.slice(this.signatureLocation,this.signatureLocation+2),16);
 	    if (this.sig3 == 27){this.sig3 = "00"};
     	    if (this.sig3 == 28){this.sig3 = "01"};
-	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68);
-	    this.sig2 = signed.slice(this.signatureLocation + 70,this.signatureLocation + 134);
+	    this.adjust = 0;
+	    this.firstSig = parseInt(signed.slice(this.signatureLocation+2,this.signatureLocation+4),16);
+	    if (this.firstSig == 159) {this.adjust = 2;}
+	    if (this.firstSig == 158) {this.adjust = 4;}
+	    if (this.firstSig == 157) {this.adjust = 6;}
+	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68 - this.adjust);
+	    this.sig2 = signed.slice(this.signatureLocation + 70 - this.adjust,this.signatureLocation + 134 - this.adjust);
+	        if (this.adjust == 2) {this.sig1 = "00".concat(this.sig1);}
+		if (this.adjust == 4) {this.sig1 = "0000".concat(this.sig1);}
+		if (this.adjust == 6) {this.sig1 = "000000".concat(this.sig1);}
 	    if (this.sig2.length < 64) {
 		this.sigCount = 64 - this.sig2.length;
 		if (this.sigCount == 2) {this.sig2 = "00".concat(this.sig2);}
@@ -393,8 +417,16 @@ class thetatx {
 	    this.sig3 = parseInt(signed.slice(this.signatureLocation,this.signatureLocation+2),16);
 	    if (this.sig3 == 27){this.sig3 = "00"};
     	    if (this.sig3 == 28){this.sig3 = "01"};
-	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68);
-	    this.sig2 = signed.slice(this.signatureLocation + 70,this.signatureLocation + 134);
+	    this.adjust = 0;
+	    this.firstSig = parseInt(signed.slice(this.signatureLocation+2,this.signatureLocation+4),16);
+	    if (this.firstSig == 159) {this.adjust = 2;}
+	    if (this.firstSig == 158) {this.adjust = 4;}
+	    if (this.firstSig == 157) {this.adjust = 6;}
+	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68 - this.adjust);
+	    this.sig2 = signed.slice(this.signatureLocation + 70 - this.adjust,this.signatureLocation + 134 - this.adjust);
+	        if (this.adjust == 2) {this.sig1 = "00".concat(this.sig1);}
+		if (this.adjust == 4) {this.sig1 = "0000".concat(this.sig1);}
+		if (this.adjust == 6) {this.sig1 = "000000".concat(this.sig1);}
 	    if (this.sig2.length < 64) {
 		this.sigCount = 64 - this.sig2.length;
 		if (this.sigCount == 2) {this.sig2 = "00".concat(this.sig2);}
@@ -426,8 +458,16 @@ class thetatx {
 	    this.sig3 = parseInt(signed.slice(this.signatureLocation,this.signatureLocation+2),16);
 	    if (this.sig3 == 27){this.sig3 = "00"};
     	    if (this.sig3 == 28){this.sig3 = "01"};
-	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68);
-	    this.sig2 = signed.slice(this.signatureLocation + 70,this.signatureLocation + 134);
+	    this.adjust = 0;
+	    this.firstSig = parseInt(signed.slice(this.signatureLocation+2,this.signatureLocation+4),16);
+	    if (this.firstSig == 159) {this.adjust = 2;}
+	    if (this.firstSig == 158) {this.adjust = 4;}
+	    if (this.firstSig == 157) {this.adjust = 6;}
+	    this.sig1 = signed.slice(this.signatureLocation + 4 ,this.signatureLocation + 68 - this.adjust);
+	    this.sig2 = signed.slice(this.signatureLocation + 70 - this.adjust,this.signatureLocation + 134 - this.adjust);
+	        if (this.adjust == 2) {this.sig1 = "00".concat(this.sig1);}
+		if (this.adjust == 4) {this.sig1 = "0000".concat(this.sig1);}
+		if (this.adjust == 6) {this.sig1 = "000000".concat(this.sig1);}
 	    if (this.sig2.length < 64) {
 		this.sigCount = 64 - this.sig2.length;
 		if (this.sigCount == 2) {this.sig2 = "00".concat(this.sig2);}
