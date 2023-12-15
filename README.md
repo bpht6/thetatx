@@ -198,3 +198,38 @@ signPromise.then((signedTransaction) => {
 ```
 
 If you need more information on how to use ethers.js to create a wallet or open a json keystore file you can find it at https://docs.ethers.org/v4/api-wallet.html
+
+<h2> Creating a Raw Type 2 Transaction Example - Send with ethers-v5.5.4 </h2>
+
+```
+
+<script src="https://www.thetascan.io/dist/ethers-5.5.4.umd.min.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+<script src="https://www.thetascan.io/dist/thetatx-v1.js"
+        charset="utf-8"
+        type="text/javascript">
+</script>
+
+<script>
+var array = {};
+array["txType"] = 2;
+array["sequence"] = 1;
+array["from"] = "0x8675f93310b3b968c0bc2d416549c32314f12173";
+array["to"] = "0x0b3d7bb22d572f24a146fa9023b2bb50ef51931b";
+array["theta"] = 1;
+array["tfuel"] = 0;
+
+
+var thetaTx = new thetatx(array);
+const transaction = thetaTx.buildtx();
+const privateKey = "0x12345678901234567890123456789012345678901234567890";
+let wallet = new ethers.Wallet(privateKey);
+let signPromise = wallet.signTransaction(transaction);
+signPromise.then((signedTransaction) => {
+    console.log (thetaTx.rawtx(signedTransaction));
+});
+</script>
+
+```
